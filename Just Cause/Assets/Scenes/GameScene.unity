@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028326, g: 0.22571333, b: 0.30692202, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -365,11 +365,11 @@ Transform:
   m_GameObject: {fileID: 525849551}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 2.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 907185364}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &525849555
 MonoBehaviour:
@@ -422,14 +422,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 525849551}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20267fc02c01147f49ebc92cfb5fefad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   camTarget: {fileID: 0}
-  posU: 0.02
-  rotU: 0.01
 --- !u!1 &726724923
 GameObject:
   m_ObjectHideFlags: 0
@@ -577,7 +575,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 525849554}
   - {fileID: 1847649804}
   m_Father: {fileID: 4000785937064571930}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -605,8 +602,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1847649803}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.7, y: 0.5, z: -1.7}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.3, y: 0, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2544,13 +2541,10 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  movementForce: 1
-  jumpForce: 5
-  maxSpeed: 5
-  sensitivity: 2
   orientation: {fileID: 907185364}
   lookVector: {x: 0, y: 0}
-  sprinting: 0
+  animateSprint: 0
+  animateJump: 0
 --- !u!54 &7018166538207325794
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2598,9 +2592,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 1.9427793
+  m_Height: 1.901551
   m_Direction: 1
-  m_Center: {x: 0, y: 0.91764295, z: 0}
+  m_Center: {x: 0, y: 0.9382571, z: 0}
 --- !u!114 &7018166538207325796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3101,6 +3095,7 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 525849554}
   - {fileID: 726724925}
   - {fileID: 127537052}
   - {fileID: 297895465}

@@ -16,9 +16,25 @@ public class AnimationController : MonoBehaviour
     {
         anim.SetFloat("speed", PlayerController.Instance.GetComponent<Rigidbody>().velocity.magnitude / maxSpeed);
         //Debug.Log(player.GetComponent<Rigidbody>().velocity.magnitude / maxSpeed);
-        if (PlayerController.Instance.sprinting)
+        if (PlayerController.Instance.animateSprint)
         {
             anim.SetBool("sprinting", true);
         }
+        else
+        {
+            anim.SetBool("sprinting", false);
+        }
+
+        if (PlayerController.Instance.animateJump)
+        {
+            anim.SetBool("jumping", true);
+        }
+        else
+        {
+            anim.SetBool("jumping", false);
+        }
+
+        anim.SetFloat("strafe", PlayerController.Instance.forceDirection.x);
+
     }
 }

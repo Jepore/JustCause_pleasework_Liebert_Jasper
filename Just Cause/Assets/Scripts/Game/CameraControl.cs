@@ -5,17 +5,19 @@ using UnityEngine;
 public class CameraControl : MonoBehaviour
 {
     public Transform camTarget;
-    public float posU = 0.02f;
-    public float rotU = 0.01f;
+    // speed of interpolation for position and rotation (values are just trial/error) 
+    private float posU = 0.13f;
+    private float rotU = 0.09f;
 
     private void Start()
     {
-        camTarget = PlayerController.Instance.transform.Find("Camera Target").transform;
+        camTarget = PlayerController.Instance.transform.Find("Orientation").transform.Find("Camera Target").transform;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         transform.position = Vector3.Lerp(transform.position, camTarget.position, posU);
         transform.rotation = Quaternion.Lerp(transform.rotation, camTarget.rotation, rotU);
+
     }
 }
