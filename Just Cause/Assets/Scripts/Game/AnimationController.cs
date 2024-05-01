@@ -34,7 +34,7 @@ public class AnimationController : MonoBehaviour
             anim.SetBool("jumping", false);
         }
 
-        anim.SetFloat("strafe", PlayerController.Instance.forceDirection.x);
+        anim.SetFloat("strafe", PlayerController.Instance.move.ReadValue<Vector2>().x);
 
     }
 }

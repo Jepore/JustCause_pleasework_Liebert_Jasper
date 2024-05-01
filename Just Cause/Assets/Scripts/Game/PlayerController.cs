@@ -9,13 +9,12 @@ public class PlayerController : MonoBehaviour
 
     // input
     public ThirdPersonInputActions playerInputActions;
-    private InputAction move;
+    public InputAction move;
     public InputAction lookDelta;
 
     // movement
-    private Vector2 moveVector;
     private Rigidbody playerRB;
-    private float movementForce = 1f;
+    private float movementForce = 0.7f;
     private float jumpForce = 10f;
     private float maxSpeed = 5f;
     public Vector3 forceDirection = Vector3.zero;
@@ -82,22 +81,26 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce, forceDirection.y, move.ReadValue<Vector2>().y * movementForce);
+        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce);
 
-        playerRB.AddForce(forceDirection, ForceMode.Impulse);
-
-        forceDirection = Vector3.zero;
 
         if (IsGrounded())
         {
-            Debug.Log("not");
+            //Debug.Log("not");
             animateJump = false;
         }
         else
         {
-            Debug.Log("Jumping");
+            //Debug.Log("Jumping");
+            forceDirection.x /= 2f;
+            forceDirection.z /= 2f;
             animateJump = true;
+
         }
+
+        playerRB.AddForce(forceDirection, ForceMode.Impulse);
+
+        forceDirection = Vector3.zero;
 
         // increase the acceleration when going down so they don't float
 
