@@ -14,9 +14,10 @@ public class PlayerController : MonoBehaviour
 
     // movement
     private Rigidbody playerRB;
-    private float movementForce = 0.7f;
+    private float movementForce = 0.65f;
     private float jumpForce = 10f;
     private float maxSpeed = 5f;
+    private float sprintMult = 1.5f;
     public Vector3 forceDirection = Vector3.zero;
 
     // look
@@ -58,6 +59,10 @@ public class PlayerController : MonoBehaviour
     private void OnEnable()
     {
         playerInputActions.Player.Jump.started += DoJump;
+        playerInputActions.Player.Sprint.started += Sprint;
+        playerInputActions.Player.Sprint.canceled += StopSprint;
+
+
         move = playerInputActions.Player.Move;
         lookDelta = playerInputActions.Player.Look;
         //orientation.Find("Camera Target").transform.LookAt(this.gameObject);
@@ -71,6 +76,10 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         playerInputActions.Player.Jump.started -= DoJump;
+        playerInputActions.Player.Sprint.started -= Sprint;
+        playerInputActions.Player.Sprint.canceled -= StopSprint;
+
+
         playerInputActions.Player.Disable();
     }
 
@@ -81,8 +90,13 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce);
+        if (move.ReadValue<Vector2>().y < 0 && animateSprint)
+        {
+            movementForce /= sprintMult;
+            animateSprint = false;
+        }
 
+        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce);
 
         if (IsGrounded())
         {
@@ -95,7 +109,6 @@ public class PlayerController : MonoBehaviour
             forceDirection.x /= 2f;
             forceDirection.z /= 2f;
             animateJump = true;
-
         }
 
         playerRB.AddForce(forceDirection, ForceMode.Impulse);
@@ -124,15 +137,36 @@ public class PlayerController : MonoBehaviour
     {
         if (IsGrounded())
         {
-            Debug.Log("jumped");
+            //Debug.Log("jumped");
             forceDirection += Vector3.up * jumpForce;
         }
-        Debug.Log(forceDirection);
+        //Debug.Log(forceDirection);
 
+    }
+
+    private void Sprint(InputAction.CallbackContext obj)
+    {
+        Debug.Log("sprint");
+        if (IsGrounded())
+        {
+            movementForce *= sprintMult;
+            animateSprint = true;
+        }
+    }
+
+    private void StopSprint(InputAction.CallbackContext obj)
+    {
+        Debug.Log("no sprint");
+        if (animateSprint)
+        {
+            movementForce /= sprintMult;
+            animateSprint = false;
+        }
     }
 
     public bool IsGrounded()
     {
+        // ray starts above and goes down 0.05f units below the character to see if they are on the ground
         Ray raycast = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
         // if raycast hits anything
         if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
