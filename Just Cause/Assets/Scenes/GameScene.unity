@@ -365,7 +365,7 @@ Transform:
   m_GameObject: {fileID: 525849551}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.2, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -602,13 +602,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1847649803}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.3, y: 0, z: -2}
+  m_LocalRotation: {x: 0.060964845, y: -0.05223828, z: 0.0031950285, w: 0.9967669}
+  m_LocalPosition: {x: 0.75, y: 0, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 907185364}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 7, y: -6, z: 0}
 --- !u!1 &2079565896
 GameObject:
   m_ObjectHideFlags: 0
@@ -2532,6 +2532,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 525849553}
+  move:
+    m_Name: Move
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 85642b73-39ce-44c9-9917-8d11469e95a3
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
   lookDelta:
     m_Name: Look Delta
     m_Type: 0
@@ -2541,6 +2550,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+  forceDirection: {x: 0, y: 0, z: 0}
   orientation: {fileID: 907185364}
   lookVector: {x: 0, y: 0}
   animateSprint: 0
