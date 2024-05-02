@@ -115,9 +115,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.06425714
+  m_TransitionDuration: 0.01400347
   m_TransitionOffset: 0
-  m_ExitTime: 3.106662e-10
+  m_ExitTime: 6.5070066e-10
   m_HasExitTime: 0
   m_HasFixedDuration: 0
   m_InterruptionSource: 0
@@ -156,7 +156,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Right Strafe
-  m_Speed: 1
+  m_Speed: 1.2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 7537144457148876595}
@@ -323,7 +323,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Left Strafe
-  m_Speed: 1
+  m_Speed: 1.2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 6103470037619257365}
@@ -433,7 +433,7 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.5614092
+  m_TransitionDuration: 0.18813287
   m_TransitionOffset: 0
   m_ExitTime: 0
   m_HasExitTime: 0
@@ -678,9 +678,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.73168916
+  m_TransitionDuration: 0.5935523
   m_TransitionOffset: 0
-  m_ExitTime: 0.036271237
+  m_ExitTime: 0.036271255
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0

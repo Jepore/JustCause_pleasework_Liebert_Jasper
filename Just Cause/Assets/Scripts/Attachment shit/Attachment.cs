@@ -2,17 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+enum AttatchmentType {rocket, parachute, glider, grappler}
+
 public class Attachment : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public bool collected = true; // TODO switch to false 
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

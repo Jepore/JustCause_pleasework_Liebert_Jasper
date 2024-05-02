@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
+
+enum AttachmentType {rocket, parachute, glider, grappler}
+
 public class PlayerController : MonoBehaviour
 {
     public Camera playerCamera;
@@ -31,6 +35,8 @@ public class PlayerController : MonoBehaviour
     // animator
     public bool animateSprint;
     public bool animateJump;
+
+
 
     // singleton
     private static PlayerController _instance;
@@ -111,11 +117,16 @@ public class PlayerController : MonoBehaviour
             animateJump = true;
         }
 
+        if (move.ReadValue<Vector2>().y < 0)
+        {
+            forceDirection.z /= 2;
+        }
+
         playerRB.AddForce(forceDirection, ForceMode.Impulse);
 
         forceDirection = Vector3.zero;
 
-        // increase the acceleration when going down so they don't float
+        // increase the acceleration when going down so they don't float (gravity is increased to 16 right now)
 
     }
 
@@ -178,4 +189,58 @@ public class PlayerController : MonoBehaviour
             return false;
         }
     }
+
+    private void AttachManager(AttachmentType attachment)
+    {
+        switch (attachment)
+        {
+            case AttachmentType.rocket:
+                //this.gameObject.GetComponent<Weapon>().collected = true;
+                //this.gameObject.GetComponent<Weapon>().rocketGun.SetActive(true);
+                break;
+            case AttachmentType.parachute:
+                //this.gameObject.GetComponent<Parachute>().collected = true;
+                //this.gameObject.GetComponent<Parachute>().parchuteModel.SetActive(true);
+                break;
+            case AttachmentType.glider:
+                //this.gameObject.GetComponent<Glider>().collected = true;
+                //this.gameObject.GetComponent<Glider>().gliderModel.SetActive(true);
+                break;
+            case AttachmentType.grappler:
+                this.gameObject.GetComponent<Grappler>().collected = true;
+                this.gameObject.GetComponent<Grappler>().grapplingGun.SetActive(true);
+                break;
+            default:
+                Debug.Log("sumn broke with attachmanager");
+                break;
+
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        switch (other.tag)
+        {
+            case "rocketPickup":
+                AttachManager(AttachmentType.rocket);
+                other.gameObject.SetActive(false);
+                break;
+            case "parachutePickup":
+                AttachManager(AttachmentType.parachute);
+                other.gameObject.SetActive(false);
+                break;
+            case "gliderPickup":
+                AttachManager(AttachmentType.glider);
+                other.gameObject.SetActive(false);
+                break;
+            case "grapplerPickup":
+                AttachManager(AttachmentType.grappler);
+                other.gameObject.SetActive(false);
+                break;
+            default:
+                break;
+        }
+
+    }
+
 }
