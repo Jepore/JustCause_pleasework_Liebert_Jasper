@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
     private float movementForce = 0.65f;
     private float jumpForce = 10f;
     private float maxSpeed = 5f;
-    private float sprintMult = 1.5f;
+    private float sprintMult = 1.35f;
     public Vector3 forceDirection = Vector3.zero;
 
     // look

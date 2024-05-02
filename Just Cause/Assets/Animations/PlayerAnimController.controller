@@ -31,7 +31,7 @@ BlendTree:
       type: 3}
     m_Threshold: 1.1
     m_Position: {x: 0, y: 0}
-    m_TimeScale: 1
+    m_TimeScale: 1.1
     m_CycleOffset: 0
     m_DirectBlendParameter: Blend
     m_Mirror: 0
@@ -115,9 +115,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.01400347
-  m_TransitionOffset: 0
-  m_ExitTime: 6.5070066e-10
+  m_TransitionDuration: 0.051646702
+  m_TransitionOffset: 0.15684612
+  m_ExitTime: 0.011828527
   m_HasExitTime: 0
   m_HasFixedDuration: 0
   m_InterruptionSource: 0
