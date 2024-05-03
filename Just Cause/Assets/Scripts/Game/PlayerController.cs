@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
 
     // movement
     private Rigidbody playerRB;
-    private float movementForce = 0.55f;
+    public float movementForce = 0.55f;
     private float jumpForce = 10f;
     private float maxSpeed = 5f;
     private float sprintMult = 1.35f;
@@ -198,6 +198,7 @@ public class PlayerController : MonoBehaviour
         if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
         {
             //test.transform.position = hit.point;
+            Debug.Log("IS GROUNDED");
             return true;
         }
         else
