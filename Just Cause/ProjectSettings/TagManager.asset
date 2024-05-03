@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - grapplerPickup
+  - rocketPickup
+  - gliderPickup
+  - parachutePickup
   layers:
   - Default
   - TransparentFX

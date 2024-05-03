@@ -9,6 +9,8 @@ enum AttachmentType {rocket, parachute, glider, grappler}
 
 public class PlayerController : MonoBehaviour
 {
+    public GameObject test;
+
     public Camera playerCamera;
 
     // input
@@ -18,7 +20,7 @@ public class PlayerController : MonoBehaviour
 
     // movement
     private Rigidbody playerRB;
-    private float movementForce = 0.65f;
+    private float movementForce = 0.55f;
     private float jumpForce = 10f;
     private float maxSpeed = 5f;
     private float sprintMult = 1.35f;
@@ -67,7 +69,8 @@ public class PlayerController : MonoBehaviour
         playerInputActions.Player.Jump.started += DoJump;
         playerInputActions.Player.Sprint.started += Sprint;
         playerInputActions.Player.Sprint.canceled += StopSprint;
-
+        playerInputActions.Player.Grapple.started += Grapple;
+        playerInputActions.Player.Grapple.canceled += InitiateGrapple;
 
         move = playerInputActions.Player.Move;
         lookDelta = playerInputActions.Player.Look;
@@ -84,6 +87,8 @@ public class PlayerController : MonoBehaviour
         playerInputActions.Player.Jump.started -= DoJump;
         playerInputActions.Player.Sprint.started -= Sprint;
         playerInputActions.Player.Sprint.canceled -= StopSprint;
+        playerInputActions.Player.Grapple.started -= Grapple;
+        playerInputActions.Player.Grapple.canceled -= InitiateGrapple;
 
 
         playerInputActions.Player.Disable();
@@ -104,9 +109,8 @@ public class PlayerController : MonoBehaviour
 
         forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce);
 
-        if (IsGrounded())
+        if (IsGrounded() || this.gameObject.GetComponent<Grappler>().isWallHanging || this.gameObject.GetComponent<Grappler>().isWallSticking) // don't know if it's bad to have 3 or statements but oh well
         {
-            //Debug.Log("not");
             animateJump = false;
         }
         else
@@ -119,6 +123,7 @@ public class PlayerController : MonoBehaviour
 
         if (move.ReadValue<Vector2>().y < 0)
         {
+            //Debug.Log(move.ReadValue<Vector2>() + "forceDirection: " + forceDirection);
             forceDirection.z /= 2;
         }
 
@@ -155,9 +160,19 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    private void Grapple(InputAction.CallbackContext obj)
+    {
+        this.GetComponent<Grappler>().GrappleHook();
+    }
+
+    private void InitiateGrapple(InputAction.CallbackContext obj)
+    {
+        this.GetComponent<Grappler>().StartGrapple();
+    }
+
     private void Sprint(InputAction.CallbackContext obj)
     {
-        Debug.Log("sprint");
+        //Debug.Log("sprint");
         if (IsGrounded())
         {
             movementForce *= sprintMult;
@@ -167,7 +182,7 @@ public class PlayerController : MonoBehaviour
 
     private void StopSprint(InputAction.CallbackContext obj)
     {
-        Debug.Log("no sprint");
+        //Debug.Log("no sprint");
         if (animateSprint)
         {
             movementForce /= sprintMult;
@@ -182,6 +197,7 @@ public class PlayerController : MonoBehaviour
         // if raycast hits anything
         if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
         {
+            //test.transform.position = hit.point;
             return true;
         }
         else
@@ -195,20 +211,20 @@ public class PlayerController : MonoBehaviour
         switch (attachment)
         {
             case AttachmentType.rocket:
-                //this.gameObject.GetComponent<Weapon>().collected = true;
-                //this.gameObject.GetComponent<Weapon>().rocketGun.SetActive(true);
+                this.gameObject.GetComponent<Weapon>().collected = true;
+                this.gameObject.GetComponent<Weapon>().attachmentGameObject.SetActive(true);
                 break;
             case AttachmentType.parachute:
-                //this.gameObject.GetComponent<Parachute>().collected = true;
-                //this.gameObject.GetComponent<Parachute>().parchuteModel.SetActive(true);
+                this.gameObject.GetComponent<Parachute>().collected = true;
+                this.gameObject.GetComponent<Parachute>().attachmentGameObject.SetActive(true);
                 break;
             case AttachmentType.glider:
-                //this.gameObject.GetComponent<Glider>().collected = true;
-                //this.gameObject.GetComponent<Glider>().gliderModel.SetActive(true);
+                this.gameObject.GetComponent<Glider>().collected = true;
+                this.gameObject.GetComponent<Glider>().attachmentGameObject.SetActive(true);
                 break;
             case AttachmentType.grappler:
                 this.gameObject.GetComponent<Grappler>().collected = true;
-                this.gameObject.GetComponent<Grappler>().grapplingGun.SetActive(true);
+                this.gameObject.GetComponent<Grappler>().attachmentGameObject.SetActive(true);
                 break;
             default:
                 Debug.Log("sumn broke with attachmanager");

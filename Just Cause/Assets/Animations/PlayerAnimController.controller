@@ -20,7 +20,7 @@ BlendTree:
   - serializedVersion: 2
     m_Motion: {fileID: -203655887218126122, guid: eb526c7562ae64b7d82f3f2645096040,
       type: 3}
-    m_Threshold: 0.68567646
+    m_Threshold: 0.42163295
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
@@ -39,7 +39,7 @@ BlendTree:
   m_BlendParameterY: Blend
   m_MinThreshold: 0.2713528
   m_MaxThreshold: 1.1
-  m_UseAutomaticThresholds: 1
+  m_UseAutomaticThresholds: 0
   m_NormalizedBlendValues: 0
   m_BlendType: 0
 --- !u!1101 &-7235022645477915033
@@ -109,15 +109,18 @@ AnimatorStateTransition:
   - m_ConditionMode: 4
     m_ConditionEvent: strafe
     m_EventTreshold: -0.7
+  - m_ConditionMode: 3
+    m_ConditionEvent: speed
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -1345694650408361933}
   m_Solo: 0
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.051646702
-  m_TransitionOffset: 0.15684612
-  m_ExitTime: 0.011828527
+  m_TransitionDuration: 0.114399984
+  m_TransitionOffset: 0.03812083
+  m_ExitTime: 0.0010841575
   m_HasExitTime: 0
   m_HasFixedDuration: 0
   m_InterruptionSource: 0
@@ -156,7 +159,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Right Strafe
-  m_Speed: 1.2
+  m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 7537144457148876595}
@@ -279,9 +282,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.4003778
+  m_TransitionDuration: 0.19085106
   m_TransitionOffset: 0
-  m_ExitTime: 0.04249291
+  m_ExitTime: 0.0148140155
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -323,7 +326,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Left Strafe
-  m_Speed: 1.2
+  m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 6103470037619257365}
@@ -427,6 +430,9 @@ AnimatorStateTransition:
   - m_ConditionMode: 3
     m_ConditionEvent: strafe
     m_EventTreshold: 0.7
+  - m_ConditionMode: 3
+    m_ConditionEvent: speed
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -5395395820759542007}
   m_Solo: 0
@@ -623,9 +629,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.50670457
-  m_TransitionOffset: 0
-  m_ExitTime: 0.000000013123409
+  m_TransitionDuration: 0.6342805
+  m_TransitionOffset: 0.001605557
+  m_ExitTime: 0.017742353
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
