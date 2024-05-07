@@ -34,6 +34,24 @@ public class AnimationController : MonoBehaviour
             anim.SetBool("jumping", false);
         }
 
+        if(this.GetComponent<Grappler>().isGrappling)
+        {
+            anim.SetBool("grappling", true);
+        }
+        else
+        {
+            anim.SetBool("grappling", false);
+        }
+
+        if (this.GetComponent<Parachute>().isParachuting)
+        {
+            anim.SetBool("parachuting", true);
+        }
+        else
+        {
+            anim.SetBool("parachuting", false);
+        }
+
         anim.SetFloat("strafe", PlayerController.Instance.move.ReadValue<Vector2>().x);
 
     }

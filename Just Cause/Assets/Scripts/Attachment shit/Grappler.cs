@@ -10,9 +10,10 @@ public class Grappler : Attachment
     public bool grappled = false; // when the grappling hook is stuck to a wall
 
     public Transform gunTip;
+    public LineRenderer lr;
 
     private Vector3 gunTipStartPos;
-    public Vector3 grapplePoint = Vector3.zero;
+    public Vector3 grapplePoint = Vector3.zero; 
     public float grappleU; // make all these private below
     public float grappleTimeStart;
     public float grappleTimeDuration;
@@ -28,6 +29,7 @@ public class Grappler : Attachment
         tempMoveForce = PlayerController.Instance.movementForce;
         attachmentGameObject = PlayerController.Instance.transform.Find("Grappler").gameObject;
         gunTip = attachmentGameObject.transform.Find("Gun Tip").transform;
+        lr = this.GetComponent<LineRenderer>();
         attachmentGameObject.SetActive(false);
     }
 
@@ -40,11 +42,12 @@ public class Grappler : Attachment
     {
         if (collected && !grappled)
         {
-            Ray raycast = new Ray(gunTip.position, CameraControl.Instance.transform.forward);
-            if (Physics.Raycast(raycast, out RaycastHit hit, maxGrappleDist))
+            Ray raycast = new Ray(CameraControl.Instance.transform.position, CameraControl.Instance.transform.forward);
+            if (Physics.Raycast(raycast, out RaycastHit hit, maxGrappleDist) && hit.collider.gameObject != this.gameObject)
             {
                 //Debug.Log(hit.point);
                 PlayerController.Instance.test.transform.position = hit.point;
+                PlayerController.Instance.movementForce /= 2;
                 grapplePoint = hit.point;
                 StartCoroutine(GrappleHookHit());
             }
@@ -68,9 +71,15 @@ public class Grappler : Attachment
         if (collected && grappled)
         {
             isGrappling = true;
+            this.GetComponent<Parachute>().isParachuting = false; // i could also make the grappling hook pull the parachute in the direction of the grapplePoint for a period of time
             gunTipStartPos = gunTip.position;
             grappleTimeStart = Time.time;
             grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/8f;
+
+            PlayerController.Instance.movementForce = 0f;
+            PlayerController.Instance.grappleRot = PlayerController.Instance.transform.forward.y;
+            PlayerController.Instance.playerRB.useGravity = false;
+
             //grapplePoint = Vector3.zero;
         }
         else
@@ -96,6 +105,7 @@ public class Grappler : Attachment
             }
 
             grapplePos = (1 - grappleU) * grapplePoint + grappleU * gunTipStartPos;
+            //grapplePos = 
             Vector3 grappleGunTipOffset = gunTip.position - this.transform.position;
 
             if (PlayerController.Instance.IsGrounded() && grapplePos.y < gunTip.position.y)
@@ -103,31 +113,76 @@ public class Grappler : Attachment
                 grapplePos.y = gunTip.position.y;
             }
             //Debug.Log(grapplePos);
-            this.transform.position = grapplePos - grappleGunTipOffset;
+            PlayerController.Instance.playerRB.position = grapplePos - grappleGunTipOffset;
         }
+    }
 
+    private void RenderGrappleLine()
+    {
+        if(grappled)
+        {
+            lr.SetPosition(0, gunTip.position);
+            lr.SetPosition(1, grapplePoint);
+        }
+        else
+        {
+            lr.enabled = false;
+            gunTipStartPos = Vector3.zero;
+            grapplePoint = Vector3.zero;
+        }
     }
 
     private void StopGrapple()
-    {
+    { 
+        PlayerController.Instance.grappleRot = PlayerController.Instance.transform.forward.y;
+        PlayerController.Instance.playerRB.useGravity = true;
 
+        PlayerController.Instance.movementForce = tempMoveForce;
         isGrappling = false;
         grappled = false; //for is wall hanging
-
-        //gunTipStartPos = Vector3.zero;
-        //grapplePoint = Vector3.zero;
     }
+
     // Update is called once per frame
    private void Update()
     {
         Grappling();
+        RenderGrappleLine();
+
+        if (PlayerController.Instance.playerInputActions.Player.Jump.triggered && isGrappling)
+        {
+            grappleU = 0;
+            StopGrapple();
+            PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce;
+        }
     }
 
     private IEnumerator GrappleHookHit()
     {
         PlayerController.Instance.movementForce = 0f;
         grappled = true;
-        yield return new WaitForSeconds(0.2f);
+        lr.enabled = true;
+        yield return new WaitForSeconds(0.3f);
         PlayerController.Instance.movementForce = tempMoveForce;
+    }
+
+    private IEnumerator GrappleHookMiss()
+    {
+        PlayerController.Instance.movementForce = 0f;
+        grappled = true;
+        lr.enabled = true;
+        yield return new WaitForSeconds(0.3f);
+        grappled = false;
+        PlayerController.Instance.movementForce = tempMoveForce;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag != "floor")
+        {
+            grappleU = 0;
+            StopGrapple();
+            Debug.Log("hit something");
+        }
+
     }
 }

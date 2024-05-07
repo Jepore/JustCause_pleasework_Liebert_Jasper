@@ -19,9 +19,9 @@ public class PlayerController : MonoBehaviour
     public InputAction lookDelta;
 
     // movement
-    private Rigidbody playerRB;
+    public Rigidbody playerRB;
     public float movementForce = 0.55f;
-    private float jumpForce = 10f;
+    public float jumpForce = 10f;
     private float maxSpeed = 5f;
     private float sprintMult = 1.35f;
     public Vector3 forceDirection = Vector3.zero;
@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour
     private float sensitivity = 0.2f;
     private float upDownRange = 80f;
     private float verticalRot;
+    public float grappleRot;
     public Transform orientation;
     public Vector2 lookVector;
     private Vector3 charLook; // for only the player (no x value in the euler)
@@ -112,6 +113,7 @@ public class PlayerController : MonoBehaviour
         if (IsGrounded() || this.gameObject.GetComponent<Grappler>().isWallHanging || this.gameObject.GetComponent<Grappler>().isWallSticking) // don't know if it's bad to have 3 or statements but oh well
         {
             animateJump = false;
+            this.GetComponent<Parachute>().isParachuting = false;
         }
         else
         {
@@ -140,12 +142,21 @@ public class PlayerController : MonoBehaviour
         lookVector = lookDelta.ReadValue<Vector2>();
 
         float mouseX = lookVector.x * sensitivity;
-        transform.Rotate(0, mouseX, 0);
 
         verticalRot -= lookVector.y * sensitivity;
         verticalRot = Mathf.Clamp(verticalRot, -upDownRange, upDownRange);
 
-        orientation.localRotation = Quaternion.Euler(verticalRot, 0, 0);
+        if(this.gameObject.GetComponent<Grappler>().isGrappling)
+        {
+            grappleRot += mouseX;
+            orientation.localRotation = Quaternion.Euler(verticalRot, grappleRot, 0);
+        }
+        else
+        {
+            transform.Rotate(0, mouseX, 0);
+            orientation.localRotation = Quaternion.Euler(verticalRot, 0, 0);
+        }
+
     }
 
 
@@ -155,6 +166,10 @@ public class PlayerController : MonoBehaviour
         {
             //Debug.Log("jumped");
             forceDirection += Vector3.up * jumpForce;
+        }
+        else
+        {
+            this.GetComponent<Parachute>().ActivateParachute();
         }
         //Debug.Log(forceDirection);
 
@@ -198,7 +213,7 @@ public class PlayerController : MonoBehaviour
         if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
         {
             //test.transform.position = hit.point;
-            Debug.Log("IS GROUNDED");
+            //Debug.Log("IS GROUNDED");
             return true;
         }
         else
@@ -259,5 +274,4 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
 }
