@@ -7,6 +7,7 @@ public class Parachute : Attachment
     public bool isParachuting = false;
 
     public GameObject parachuteObject;
+    private float parachuteGrav = 1.4f;
 
     // Start is called before the first frame update
     private void Start()
@@ -28,7 +29,8 @@ public class Parachute : Attachment
         if (collected && !isParachuting && !this.GetComponent<Grappler>().isGrappling)
         {
             isParachuting = true;
-            PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce;
+            PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce * 2;
+            PlayerController.Instance.playerRB.useGravity = false;
             Debug.Log("parachute activate");
         }
         else
@@ -42,10 +44,17 @@ public class Parachute : Attachment
         if (isParachuting)
         {
             parachuteObject.SetActive(true);
+            PlayerController.Instance.playerRB.position -= Vector3.up * parachuteGrav * Time.deltaTime;
         }
         else
         {
             parachuteObject.SetActive(false);
         }
+    }
+
+    public void StopParachuting()
+    {
+        isParachuting = false;
+        PlayerController.Instance.playerRB.useGravity = true;
     }
 }

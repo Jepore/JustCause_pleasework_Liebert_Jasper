@@ -8,6 +8,7 @@ public class Grappler : Attachment
     public bool isWallSticking = false;
     public bool isWallHanging = false;
     public bool grappled = false; // when the grappling hook is stuck to a wall
+    private bool grapplingLine = false; // when the grappling hook is being rendered
 
     public Transform gunTip;
     public LineRenderer lr;
@@ -53,9 +54,10 @@ public class Grappler : Attachment
             }
             else
             {
-                Vector3 centerScreen = new Vector3(Screen.width / 2, Screen.height / 2 + grappleYOffset, maxGrappleDist);
+                Vector3 centerScreen = new Vector3(Screen.width / 2, Screen.height / 2, maxGrappleDist);
                 PlayerController.Instance.test.transform.position = CameraControl.Instance.gameObject.GetComponent<Camera>().ScreenToWorldPoint(centerScreen);
                 grapplePoint = CameraControl.Instance.gameObject.GetComponent<Camera>().ScreenToWorldPoint(centerScreen);
+                StartCoroutine(GrappleHookMiss());
                 //Debug.Log(CameraControl.Instance.gameObject.GetComponent<Camera>().ScreenToWorldPoint(Vector3.forward * maxGrappleDist));
             }
         }
@@ -74,10 +76,10 @@ public class Grappler : Attachment
             this.GetComponent<Parachute>().isParachuting = false; // i could also make the grappling hook pull the parachute in the direction of the grapplePoint for a period of time
             gunTipStartPos = gunTip.position;
             grappleTimeStart = Time.time;
-            grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/8f;
+            grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/18f;
 
             PlayerController.Instance.movementForce = 0f;
-            PlayerController.Instance.grappleRot = PlayerController.Instance.transform.forward.y;
+            PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
             PlayerController.Instance.playerRB.useGravity = false;
 
             //grapplePoint = Vector3.zero;
@@ -119,7 +121,7 @@ public class Grappler : Attachment
 
     private void RenderGrappleLine()
     {
-        if(grappled)
+        if(grapplingLine)
         {
             lr.SetPosition(0, gunTip.position);
             lr.SetPosition(1, grapplePoint);
@@ -134,12 +136,14 @@ public class Grappler : Attachment
 
     private void StopGrapple()
     { 
-        PlayerController.Instance.grappleRot = PlayerController.Instance.transform.forward.y;
+        if (!grappled) return;
+        PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
         PlayerController.Instance.playerRB.useGravity = true;
 
         PlayerController.Instance.movementForce = tempMoveForce;
         isGrappling = false;
         grappled = false; //for is wall hanging
+        grapplingLine = false;
     }
 
     // Update is called once per frame
@@ -152,7 +156,10 @@ public class Grappler : Attachment
         {
             grappleU = 0;
             StopGrapple();
-            PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce;
+            if(!PlayerController.Instance.IsGrounded())
+            {
+                PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce;
+            }
         }
     }
 
@@ -160,6 +167,7 @@ public class Grappler : Attachment
     {
         PlayerController.Instance.movementForce = 0f;
         grappled = true;
+        grapplingLine = true;
         lr.enabled = true;
         yield return new WaitForSeconds(0.3f);
         PlayerController.Instance.movementForce = tempMoveForce;
@@ -168,10 +176,10 @@ public class Grappler : Attachment
     private IEnumerator GrappleHookMiss()
     {
         PlayerController.Instance.movementForce = 0f;
-        grappled = true;
+        grapplingLine = true;
         lr.enabled = true;
         yield return new WaitForSeconds(0.3f);
-        grappled = false;
+        grapplingLine = false;
         PlayerController.Instance.movementForce = tempMoveForce;
     }
 

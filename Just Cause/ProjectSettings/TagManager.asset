@@ -8,6 +8,7 @@ TagManager:
   - rocketPickup
   - gliderPickup
   - parachutePickup
+  - floor
   layers:
   - Default
   - TransparentFX

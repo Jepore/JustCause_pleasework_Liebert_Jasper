@@ -27,10 +27,10 @@ public class PlayerController : MonoBehaviour
     public Vector3 forceDirection = Vector3.zero;
 
     // look
-    private float sensitivity = 0.2f;
+    private float sensitivity = 0.1f;
     private float upDownRange = 80f;
     private float verticalRot;
-    public float grappleRot;
+    public float lookRot;
     public Transform orientation;
     public Vector2 lookVector;
     private Vector3 charLook; // for only the player (no x value in the euler)
@@ -58,12 +58,11 @@ public class PlayerController : MonoBehaviour
         {
             _instance = this;
         }
-
     }
 
     /// <summary>
-    /// will be called whenever SetActive(true)
-    /// instead of start
+    /// will be called whenever SetActive(true) instead of start
+    /// just for all the input actions stuff
     /// </summary>
     private void OnEnable()
     {
@@ -113,7 +112,7 @@ public class PlayerController : MonoBehaviour
         if (IsGrounded() || this.gameObject.GetComponent<Grappler>().isWallHanging || this.gameObject.GetComponent<Grappler>().isWallSticking) // don't know if it's bad to have 3 or statements but oh well
         {
             animateJump = false;
-            this.GetComponent<Parachute>().isParachuting = false;
+            this.GetComponent<Parachute>().StopParachuting();
         }
         else
         {
@@ -129,12 +128,16 @@ public class PlayerController : MonoBehaviour
             forceDirection.z /= 2;
         }
 
+        if (playerRB.velocity.y < 0)
+        {
+            forceDirection.y -= .22f;
+        }
+
         playerRB.AddForce(forceDirection, ForceMode.Impulse);
 
         forceDirection = Vector3.zero;
 
         // increase the acceleration when going down so they don't float (gravity is increased to 16 right now)
-
     }
 
     private void Look()
@@ -148,17 +151,15 @@ public class PlayerController : MonoBehaviour
 
         if(this.gameObject.GetComponent<Grappler>().isGrappling)
         {
-            grappleRot += mouseX;
-            orientation.localRotation = Quaternion.Euler(verticalRot, grappleRot, 0);
+            lookRot += mouseX;
+            orientation.localRotation = Quaternion.Euler(verticalRot, lookRot, 0);
         }
         else
         {
             transform.Rotate(0, mouseX, 0);
             orientation.localRotation = Quaternion.Euler(verticalRot, 0, 0);
         }
-
     }
-
 
     private void DoJump(InputAction.CallbackContext obj)
     {
@@ -172,7 +173,6 @@ public class PlayerController : MonoBehaviour
             this.GetComponent<Parachute>().ActivateParachute();
         }
         //Debug.Log(forceDirection);
-
     }
 
     private void Grapple(InputAction.CallbackContext obj)
@@ -193,6 +193,10 @@ public class PlayerController : MonoBehaviour
             movementForce *= sprintMult;
             animateSprint = true;
         }
+        else
+        {
+            this.GetComponent<Glider>().ActivateGlider();
+        }
     }
 
     private void StopSprint(InputAction.CallbackContext obj)
@@ -207,19 +211,26 @@ public class PlayerController : MonoBehaviour
 
     public bool IsGrounded()
     {
-        // ray starts above and goes down 0.05f units below the character to see if they are on the ground
-        Ray raycast = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
-        // if raycast hits anything
-        if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
+        float frontBackCheckDist = 0.4f;
+        float frontBackCeck = -frontBackCheckDist;
+
+        for (int index = 0; index < 3; index++)
         {
-            //test.transform.position = hit.point;
-            //Debug.Log("IS GROUNDED");
-            return true;
+            // ray starts above and goes down 0.05f units below the character to see if they are on the ground
+            Ray raycast = new Ray(this.transform.position + Vector3.up * 0.25f + this.transform.forward * frontBackCeck, Vector3.down);
+            // if raycast hits anything
+            if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
+            {
+                //test.transform.position = hit.point;
+                //Debug.Log("IS GROUNDED");
+                return true;
+            }
+            else
+            {
+                frontBackCeck += frontBackCheckDist;
+            }
         }
-        else
-        {
-            return false;
-        }
+        return false; 
     }
 
     private void AttachManager(AttachmentType attachment)

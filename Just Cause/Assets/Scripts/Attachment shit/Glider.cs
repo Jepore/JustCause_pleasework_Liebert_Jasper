@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Glider : Attachment
 {
-
+    public bool isGliding = false;
 
     // Start is called before the first frame update
     private void Start()
@@ -17,5 +17,13 @@ public class Glider : Attachment
     void Update()
     {
         
+    }
+
+    public void ActivateGlider()
+    {
+        if (collected && !isGliding)
+        {
+            isGliding = true;
+        }
     }
 }
