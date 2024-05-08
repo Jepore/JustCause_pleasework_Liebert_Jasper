@@ -5,7 +5,8 @@ using UnityEngine.InputSystem;
 
 
 
-enum AttachmentType {rocket, parachute, glider, grappler}
+public enum AttachmentType {rocket, parachute, glider, grappler}
+public enum ActionState {walking, sprinting, falling, grappling, parachuting, gliding}
 
 public class PlayerController : MonoBehaviour
 {
@@ -42,6 +43,7 @@ public class PlayerController : MonoBehaviour
     // action delegate
     public delegate void ActionDelegate();
     public ActionDelegate act;
+    public ActionState acting;
 
     // singleton
     private static PlayerController _instance;
@@ -121,20 +123,37 @@ public class PlayerController : MonoBehaviour
 
     private void ActManager()
     {
-        if (IsGrounded() && act != Sprinting)
+        if (IsGrounded() && act != Sprinting && act != Grappling)
         {
-            if(act == Parachuting)
+            switch (acting)
             {
-                Debug.Log("Ground Hit While Parachuting");
-                this.GetComponent<Parachute>().StopParachuting();
-                act = Walking;
+                case ActionState.parachuting:
+                    Debug.Log("Ground Hit While Parachuting");
+                    this.GetComponent<Parachute>().StopParachuting();
+                    //act = Walking;
+                    break;
+                case ActionState.falling:
+                    Debug.Log("Ground Hit While Falling");
+                    animateJump = false;
+                    //act = Walking;
+                    break;
+                default:
+                    //Debug.Log("no act?");
+                    break;
+
             }
-            else if (act ==Falling)
-            {
-                Debug.Log("Ground Hit While Falling");
-                animateJump = false;
-                act = Walking;
-            }
+            //if(act == Parachuting)
+            //{
+            //    Debug.Log("Ground Hit While Parachuting");
+            //    this.GetComponent<Parachute>().StopParachuting();
+            //    act = Walking;
+            //}
+            //else if (act == Falling)
+            //{
+            //    Debug.Log("Ground Hit While Falling");
+            //    animateJump = false;
+            //    act = Walking;
+            //}
                 
             act = Walking;
         }
@@ -144,8 +163,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Walking()
+    public void Walking()
     {
+        acting = ActionState.walking;
+
         animateJump = false;
         animateSprint = false;
 
@@ -160,6 +181,8 @@ public class PlayerController : MonoBehaviour
 
     private void Sprinting()
     {
+        acting = ActionState.sprinting;
+
         forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f * sprintMult, forceDirection.y, move.ReadValue<Vector2>().y * movementForce * sprintMult);
         if (move.ReadValue<Vector2>().y < 0 && animateSprint)
         {
@@ -170,10 +193,13 @@ public class PlayerController : MonoBehaviour
 
     public void Falling()
     {
+        acting = ActionState.falling;
+
         animateJump = true;
         if (playerRB.velocity.y < 0)
         {
-            forceDirection.y = playerRB.velocity.y * Time.fixedDeltaTime;
+            forceDirection.y = playerRB.velocity.y * Time.fixedDeltaTime * 3;
+            //Debug.Log("doing the thing");
         }
         //Debug.Log("Jumping");
         forceDirection.x /= 2f;
@@ -182,22 +208,29 @@ public class PlayerController : MonoBehaviour
         forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f * 0.5f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce * 0.5f);
     }
 
-    private void Grappling()
+    public void Grappling()
     {
+        acting = ActionState.grappling;
+        animateJump = false;
+
         playerRB.useGravity = false;
         //movementForce = 0f;
-        lookRot = this.transform.forward.y;
     }
 
     public void Parachuting()
     {
+        acting = ActionState.parachuting;
+
         playerRB.useGravity = false;
         forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f * 0.5f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce * 0.5f);
     }
 
-    private void Gliding()
+    public void Gliding()
     {
+        acting = ActionState.gliding;
+
         playerRB.useGravity = false;
+
         if (IsGrounded())
         {
             this.GetComponent<Glider>().StopGliding();
@@ -229,14 +262,21 @@ public class PlayerController : MonoBehaviour
     {
         if (IsGrounded())
         {
-            //Debug.Log("jumped");
+            Debug.Log("jumped");
             act = Falling;
             forceDirection += Vector3.up * jumpForce;
+        }
+        else if (this.GetComponent<Grappler>().isGrappling)
+        {
+            this.GetComponent<Grappler>().StopGrapple();
+            Debug.Log("grapplingjump");
+            act = Falling;
+            forceDirection = Vector3.up * jumpForce;
         }
         else if (this.GetComponent<Parachute>().isParachuting)
         {
             this.GetComponent<Parachute>().StopParachuting();
-            forceDirection += Vector3.up * jumpForce;
+            //forceDirection += Vector3.up * jumpForce;
             act = Walking;
         }
         else
@@ -265,7 +305,7 @@ public class PlayerController : MonoBehaviour
             act = Sprinting;
             animateSprint = true;
         }
-        else
+        else if (!GetComponent<Parachute>().isParachuting)
         {
             this.GetComponent<Glider>().ActivateGlider();
         }

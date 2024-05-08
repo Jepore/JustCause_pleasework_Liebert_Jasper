@@ -24,11 +24,16 @@ public class Glider : Attachment
         if (collected && !isGliding)
         {
             isGliding = true;
+            PlayerController.Instance.act = PlayerController.Instance.Gliding;
         }
     }
 
     public void StopGliding()
     {
-
+        if (isGliding)
+        {
+            isGliding = false;
+            PlayerController.Instance.act = PlayerController.Instance.Walking;
+        }
     }
 }

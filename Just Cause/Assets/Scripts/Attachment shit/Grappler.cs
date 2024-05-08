@@ -78,6 +78,11 @@ public class Grappler : Attachment
             grappleTimeStart = Time.time;
             grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/13f;
 
+            PlayerController.Instance.playerRB.useGravity = false;
+            PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
+
+            PlayerController.Instance.act = PlayerController.Instance.Grappling;
+
             //PlayerController.Instance.movementForce = 0f;
             //PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
             //PlayerController.Instance.playerRB.useGravity = false;
@@ -134,12 +139,12 @@ public class Grappler : Attachment
         }
     }
 
-    private void StopGrapple()
+    public void StopGrapple()
     { 
         if (!isGrappling) return;
         PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
         PlayerController.Instance.playerRB.useGravity = true;
-        PlayerController.Instance.act = PlayerController.Instance.Falling;
+        PlayerController.Instance.act = PlayerController.Instance.Walking;
 
         PlayerController.Instance.movementForce = tempMoveForce;
         isGrappling = false;
@@ -159,10 +164,9 @@ public class Grappler : Attachment
         {
             grappleU = 0;
             StopGrapple();
-            if(!PlayerController.Instance.IsGrounded())
-            {
-                PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce;
-            }
+            PlayerController.Instance.act = PlayerController.Instance.Falling;
+            //PlayerController.Instance.playerRB.AddForce(Vector3.up * PlayerController.Instance.jumpForce, ForceMode.Impulse);
+            //PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce;
         }
     }
 

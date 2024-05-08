@@ -165,7 +165,7 @@ public partial class @ThirdPersonInputActions: IInputActionCollection2, IDisposa
                 {
                     ""name"": """",
                     ""id"": ""e56c5104-f2c2-4c7d-94f1-9e8b8d2e9807"",
-                    ""path"": ""<Keyboard>/g"",
+                    ""path"": ""<Keyboard>/f"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
