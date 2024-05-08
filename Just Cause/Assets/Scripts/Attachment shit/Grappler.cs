@@ -76,11 +76,11 @@ public class Grappler : Attachment
             this.GetComponent<Parachute>().isParachuting = false; // i could also make the grappling hook pull the parachute in the direction of the grapplePoint for a period of time
             gunTipStartPos = gunTip.position;
             grappleTimeStart = Time.time;
-            grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/18f;
+            grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/13f;
 
-            PlayerController.Instance.movementForce = 0f;
-            PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
-            PlayerController.Instance.playerRB.useGravity = false;
+            //PlayerController.Instance.movementForce = 0f;
+            //PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
+            //PlayerController.Instance.playerRB.useGravity = false;
 
             //grapplePoint = Vector3.zero;
         }
@@ -136,14 +136,17 @@ public class Grappler : Attachment
 
     private void StopGrapple()
     { 
-        if (!grappled) return;
+        if (!isGrappling) return;
         PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
         PlayerController.Instance.playerRB.useGravity = true;
+        PlayerController.Instance.act = PlayerController.Instance.Falling;
 
         PlayerController.Instance.movementForce = tempMoveForce;
         isGrappling = false;
         grappled = false; //for is wall hanging
         grapplingLine = false;
+        
+        // needs to detect edge to climb up or stick to the wall
     }
 
     // Update is called once per frame

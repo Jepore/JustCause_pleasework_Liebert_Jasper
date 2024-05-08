@@ -26,4 +26,9 @@ public class Glider : Attachment
             isGliding = true;
         }
     }
+
+    public void StopGliding()
+    {
+
+    }
 }

@@ -39,7 +39,9 @@ public class PlayerController : MonoBehaviour
     public bool animateSprint;
     public bool animateJump;
 
-
+    // action delegate
+    public delegate void ActionDelegate();
+    public ActionDelegate act;
 
     // singleton
     private static PlayerController _instance;
@@ -77,6 +79,8 @@ public class PlayerController : MonoBehaviour
         //orientation.Find("Camera Target").transform.LookAt(this.gameObject);
 
         playerInputActions.Player.Enable();
+
+        act = Walking;
     }
 
     /// <summary>
@@ -101,36 +105,11 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (move.ReadValue<Vector2>().y < 0 && animateSprint)
-        {
-            movementForce /= sprintMult;
-            animateSprint = false;
-        }
+        ActManager();
 
-        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce);
-
-        if (IsGrounded() || this.gameObject.GetComponent<Grappler>().isWallHanging || this.gameObject.GetComponent<Grappler>().isWallSticking) // don't know if it's bad to have 3 or statements but oh well
+        if (act != null)
         {
-            animateJump = false;
-            this.GetComponent<Parachute>().StopParachuting();
-        }
-        else
-        {
-            //Debug.Log("Jumping");
-            forceDirection.x /= 2f;
-            forceDirection.z /= 2f;
-            animateJump = true;
-        }
-
-        if (move.ReadValue<Vector2>().y < 0)
-        {
-            //Debug.Log(move.ReadValue<Vector2>() + "forceDirection: " + forceDirection);
-            forceDirection.z /= 2;
-        }
-
-        if (playerRB.velocity.y < 0)
-        {
-            forceDirection.y -= .22f;
+            act();
         }
 
         playerRB.AddForce(forceDirection, ForceMode.Impulse);
@@ -138,6 +117,91 @@ public class PlayerController : MonoBehaviour
         forceDirection = Vector3.zero;
 
         // increase the acceleration when going down so they don't float (gravity is increased to 16 right now)
+    }
+
+    private void ActManager()
+    {
+        if (IsGrounded() && act != Sprinting)
+        {
+            if(act == Parachuting)
+            {
+                Debug.Log("Ground Hit While Parachuting");
+                this.GetComponent<Parachute>().StopParachuting();
+                act = Walking;
+            }
+            else if (act ==Falling)
+            {
+                Debug.Log("Ground Hit While Falling");
+                animateJump = false;
+                act = Walking;
+            }
+                
+            act = Walking;
+        }
+        else if (act == Walking)
+        {
+            act = Falling;
+        }
+    }
+
+    private void Walking()
+    {
+        animateJump = false;
+        animateSprint = false;
+
+        if (move.ReadValue<Vector2>().y < 0)
+        {
+            //Debug.Log(move.ReadValue<Vector2>() + "forceDirection: " + forceDirection);
+            forceDirection.z /= 2;
+        }
+
+        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce);
+    }
+
+    private void Sprinting()
+    {
+        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f * sprintMult, forceDirection.y, move.ReadValue<Vector2>().y * movementForce * sprintMult);
+        if (move.ReadValue<Vector2>().y < 0 && animateSprint)
+        {
+            act = Walking;
+            animateSprint = false;
+        }
+    }
+
+    public void Falling()
+    {
+        animateJump = true;
+        if (playerRB.velocity.y < 0)
+        {
+            forceDirection.y = playerRB.velocity.y * Time.fixedDeltaTime;
+        }
+        //Debug.Log("Jumping");
+        forceDirection.x /= 2f;
+        forceDirection.z /= 2f;
+
+        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f * 0.5f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce * 0.5f);
+    }
+
+    private void Grappling()
+    {
+        playerRB.useGravity = false;
+        //movementForce = 0f;
+        lookRot = this.transform.forward.y;
+    }
+
+    public void Parachuting()
+    {
+        playerRB.useGravity = false;
+        forceDirection = Quaternion.LookRotation(this.transform.forward, this.transform.up) * new Vector3(move.ReadValue<Vector2>().x * movementForce * 0.7f * 0.5f, forceDirection.y, move.ReadValue<Vector2>().y * movementForce * 0.5f);
+    }
+
+    private void Gliding()
+    {
+        playerRB.useGravity = false;
+        if (IsGrounded())
+        {
+            this.GetComponent<Glider>().StopGliding();
+        }
     }
 
     private void Look()
@@ -166,7 +230,14 @@ public class PlayerController : MonoBehaviour
         if (IsGrounded())
         {
             //Debug.Log("jumped");
+            act = Falling;
             forceDirection += Vector3.up * jumpForce;
+        }
+        else if (this.GetComponent<Parachute>().isParachuting)
+        {
+            this.GetComponent<Parachute>().StopParachuting();
+            forceDirection += Vector3.up * jumpForce;
+            act = Walking;
         }
         else
         {
@@ -190,7 +261,8 @@ public class PlayerController : MonoBehaviour
         //Debug.Log("sprint");
         if (IsGrounded())
         {
-            movementForce *= sprintMult;
+            //movementForce *= sprintMult;
+            act = Sprinting;
             animateSprint = true;
         }
         else
@@ -204,8 +276,9 @@ public class PlayerController : MonoBehaviour
         //Debug.Log("no sprint");
         if (animateSprint)
         {
-            movementForce /= sprintMult;
+            //movementForce /= sprintMult;
             animateSprint = false;
+            act = Walking;
         }
     }
 
@@ -221,7 +294,7 @@ public class PlayerController : MonoBehaviour
             // if raycast hits anything
             if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
             {
-                //test.transform.position = hit.point;
+                test.transform.position = hit.point;
                 //Debug.Log("IS GROUNDED");
                 return true;
             }
