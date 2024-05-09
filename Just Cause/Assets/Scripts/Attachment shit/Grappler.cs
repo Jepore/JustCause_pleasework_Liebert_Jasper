@@ -108,6 +108,14 @@ public class Grappler : Attachment
             if (grappleU < 0)
             {
                 grappleU = 0;
+                PlayerController.Instance.act = PlayerController.Instance.Walking;
+                StopGrapple();
+                //PlayerController.Instance.StickToWall();
+            }
+            else if (PlayerController.Instance.WallStickCheck())
+            {
+                grappleU = 0;
+                PlayerController.Instance.StickToWall();
                 StopGrapple();
             }
 
@@ -143,8 +151,8 @@ public class Grappler : Attachment
     { 
         if (!isGrappling) return;
         PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
-        PlayerController.Instance.playerRB.useGravity = true;
-        PlayerController.Instance.act = PlayerController.Instance.Walking;
+        //PlayerController.Instance.playerRB.useGravity = true;
+        //PlayerController.Instance.act = PlayerController.Instance.Walking;
 
         PlayerController.Instance.movementForce = tempMoveForce;
         isGrappling = false;
@@ -192,11 +200,12 @@ public class Grappler : Attachment
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag != "floor")
+        if (collision.gameObject.tag != "floor" && isGrappling)
         {
             grappleU = 0;
+            PlayerController.Instance.act = PlayerController.Instance.Walking;
             StopGrapple();
-            Debug.Log("hit something");
+            Debug.Log("collider hit something and cancelled grapple");
         }
 
     }

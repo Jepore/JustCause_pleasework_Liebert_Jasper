@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 
 public enum AttachmentType {rocket, parachute, glider, grappler}
-public enum ActionState {walking, sprinting, falling, grappling, parachuting, gliding}
+public enum ActionState {walking, sprinting, falling, grappling, parachuting, gliding, hanging}
 
 public class PlayerController : MonoBehaviour
 {
@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour
     private float maxSpeed = 5f;
     private float sprintMult = 1.35f;
     public Vector3 forceDirection = Vector3.zero;
+    private Vector3 stickPoint;
+    public LedgeCheck ledgeCheck;
+    public Vector3 ledgeFound;
 
     // look
     private float sensitivity = 0.1f;
@@ -123,17 +126,17 @@ public class PlayerController : MonoBehaviour
 
     private void ActManager()
     {
-        if (IsGrounded() && act != Sprinting && act != Grappling)
+        if (IsGrounded() && act != Sprinting && act != Grappling && act != Hanging)
         {
             switch (acting)
             {
                 case ActionState.parachuting:
-                    Debug.Log("Ground Hit While Parachuting");
+                   // Debug.Log("Ground Hit While Parachuting");
                     this.GetComponent<Parachute>().StopParachuting();
                     //act = Walking;
                     break;
                 case ActionState.falling:
-                    Debug.Log("Ground Hit While Falling");
+                    //Debug.Log("Ground Hit While Falling");
                     animateJump = false;
                     //act = Walking;
                     break;
@@ -142,18 +145,6 @@ public class PlayerController : MonoBehaviour
                     break;
 
             }
-            //if(act == Parachuting)
-            //{
-            //    Debug.Log("Ground Hit While Parachuting");
-            //    this.GetComponent<Parachute>().StopParachuting();
-            //    act = Walking;
-            //}
-            //else if (act == Falling)
-            //{
-            //    Debug.Log("Ground Hit While Falling");
-            //    animateJump = false;
-            //    act = Walking;
-            //}
                 
             act = Walking;
         }
@@ -169,6 +160,10 @@ public class PlayerController : MonoBehaviour
 
         animateJump = false;
         animateSprint = false;
+        this.GetComponent<Grappler>().isWallHanging = false;
+        this.GetComponent<Grappler>().isWallSticking = false;
+
+        playerRB.useGravity = true;
 
         if (move.ReadValue<Vector2>().y < 0)
         {
@@ -194,6 +189,7 @@ public class PlayerController : MonoBehaviour
     public void Falling()
     {
         acting = ActionState.falling;
+        playerRB.useGravity = true;
 
         animateJump = true;
         if (playerRB.velocity.y < 0)
@@ -229,12 +225,28 @@ public class PlayerController : MonoBehaviour
     {
         acting = ActionState.gliding;
 
-        playerRB.useGravity = false;
+        playerRB.useGravity = true;
 
         if (IsGrounded())
         {
             this.GetComponent<Glider>().StopGliding();
         }
+    }
+
+    public void Hanging()
+    {
+        acting = ActionState.hanging;
+
+        playerRB.useGravity = false;
+
+        playerRB.position = Vector3.Lerp(playerRB.position, stickPoint, 20 * Time.fixedDeltaTime);
+        test.transform.position = stickPoint;
+    }
+
+    private void Lerping()
+    {
+        playerRB.useGravity = false;
+        playerRB.position = Vector3.Lerp(playerRB.position, ledgeFound, Time.fixedDeltaTime);
     }
 
     private void Look()
@@ -246,7 +258,7 @@ public class PlayerController : MonoBehaviour
         verticalRot -= lookVector.y * sensitivity;
         verticalRot = Mathf.Clamp(verticalRot, -upDownRange, upDownRange);
 
-        if(this.gameObject.GetComponent<Grappler>().isGrappling)
+        if(this.gameObject.GetComponent<Grappler>().isGrappling || this.gameObject.GetComponent<Grappler>().isWallSticking || this.gameObject.GetComponent<Grappler>().isWallHanging)
         {
             lookRot += mouseX;
             orientation.localRotation = Quaternion.Euler(verticalRot, lookRot, 0);
@@ -273,6 +285,15 @@ public class PlayerController : MonoBehaviour
             act = Falling;
             forceDirection = Vector3.up * jumpForce;
         }
+        else if (this.GetComponent<Grappler>().isWallHanging || this.GetComponent<Grappler>().isWallSticking)
+        {
+            this.GetComponent<Grappler>().isWallHanging = false;
+            this.GetComponent<Grappler>().isWallSticking = false;
+            //if
+            Debug.Log("wall hang to jump");
+            act = Falling;
+            forceDirection = Vector3.up * jumpForce;
+        }
         else if (this.GetComponent<Parachute>().isParachuting)
         {
             this.GetComponent<Parachute>().StopParachuting();
@@ -281,9 +302,90 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            Debug.Log("Last resort");
             this.GetComponent<Parachute>().ActivateParachute();
         }
         //Debug.Log(forceDirection);
+    }
+
+    public bool WallStickCheck()
+    {
+        Ray raycast = new Ray(this.transform.position + Vector3.up * 0.5f, this.transform.forward);
+        if (Physics.Raycast(raycast, out RaycastHit hit, 1f))
+        {
+            if (CheckForLedge())
+            {
+                Debug.Log("Wall hang");
+                this.GetComponent<Grappler>().isWallHanging = true;
+                act = Hanging;
+                return true;
+            }
+            else
+            {
+                Debug.Log("Wall Stick");
+                this.GetComponent<Grappler>().isWallSticking = true;
+                act = Hanging;
+                return true;
+            }
+        }
+        else
+        {
+            //Debug.Log("nothin hit");
+            return false;
+        }
+    }
+
+    public bool CheckForLedge()
+    {
+        //Debug.Log("checkforledge");
+        //ledgeCheck.transform.position = this.transform.position;
+        //ledgeCheck.transform.position += this.transform.forward * 0.5f + Vector3.up; 
+        Ray raycast = new Ray(this.transform.position + this.transform.forward + Vector3.up * 3f, Vector3.down);
+        if(Physics.Raycast(raycast, out RaycastHit hit, 1.5f))
+        {
+            ledgeFound = hit.point;
+            //test.transform.position = hit.point;
+            //Debug.Log("ledge found");
+            return true;
+        }
+        else
+        {
+            //test.transform.position = hit.point;
+            //Debug.Log("no ledge");
+            return false;
+        }
+    }
+
+    public void StickToWall()
+    {
+        Vector3 stickPos;
+
+        Ray raycast = new Ray(this.transform.position, this.transform.forward);
+        if (Physics.Raycast(raycast, out RaycastHit hit, 1f))
+        {
+            transform.forward = -hit.normal;
+            stickPos = hit.point - this.transform.forward * 0.3f;
+            //this.transform.position = stickPos;
+            if (this.GetComponent<Grappler>().isWallHanging)
+            {
+                Debug.Log("wallhagn");
+                stickPos.y = ledgeFound.y - 2.18f;
+                //this.transform.position = stickPos;
+            }
+            stickPoint = stickPos;
+            //Debug.Log(hit.normal);
+        }
+        else
+        {
+            Debug.Log("nothin hit");
+        }
+
+        if(IsGrounded())
+        {
+            this.GetComponent<Grappler>().isWallHanging = false;
+            this.GetComponent<Grappler>().isWallSticking = false;
+            act = Falling;
+        }
     }
 
     private void Grapple(InputAction.CallbackContext obj)
@@ -324,15 +426,20 @@ public class PlayerController : MonoBehaviour
 
     public bool IsGrounded()
     {
-        float frontBackCheckDist = 0.4f;
+        float frontBackCheckDist = 0.25f;
         float frontBackCeck = -frontBackCheckDist;
+
+        Vector3 forwardXZ;
 
         for (int index = 0; index < 3; index++)
         {
+            forwardXZ = this.transform.forward * frontBackCeck;
+            forwardXZ.y = 0;
+
             // ray starts above and goes down 0.05f units below the character to see if they are on the ground
-            Ray raycast = new Ray(this.transform.position + Vector3.up * 0.25f + this.transform.forward * frontBackCeck, Vector3.down);
+            Ray raycast = new Ray(this.transform.position + forwardXZ, Vector3.down);
             // if raycast hits anything
-            if (Physics.Raycast(raycast, out RaycastHit hit, .3f))
+            if (Physics.Raycast(raycast, out RaycastHit hit, .05f))
             {
                 test.transform.position = hit.point;
                 //Debug.Log("IS GROUNDED");

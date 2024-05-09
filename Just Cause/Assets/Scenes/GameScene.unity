@@ -4867,6 +4867,8 @@ MonoBehaviour:
   movementForce: 0.55
   jumpForce: 10
   forceDirection: {x: 0, y: 0, z: 0}
+  ledgeCheck: {fileID: 0}
+  ledgeFound: {x: 0, y: 0, z: 0}
   lookRot: 0
   orientation: {fileID: 907185364}
   lookVector: {x: 0, y: 0}
@@ -4919,10 +4921,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.43640777
   m_Height: 1.901551
   m_Direction: 1
-  m_Center: {x: 0, y: 0.9382571, z: 0}
+  m_Center: {x: 0, y: 0.9382571, z: -0.063592225}
 --- !u!114 &7018166538207325796
 MonoBehaviour:
   m_ObjectHideFlags: 0

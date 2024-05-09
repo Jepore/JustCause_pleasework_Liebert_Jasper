@@ -43,6 +43,15 @@ public class AnimationController : MonoBehaviour
             anim.SetBool("grappling", false);
         }
 
+        if (this.GetComponent<Grappler>().isWallHanging || this.GetComponent<Grappler>().isWallSticking)
+        {
+            anim.SetBool("hanging", true);
+        }
+        else
+        {
+            anim.SetBool("hanging", false);
+        }
+
         if (this.GetComponent<Parachute>().isParachuting)
         {
             anim.SetBool("parachuting", true);

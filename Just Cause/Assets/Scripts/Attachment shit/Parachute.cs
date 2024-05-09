@@ -35,7 +35,7 @@ public class Parachute : Attachment
         }
         else
         {
-            Debug.Log(isParachuting);
+            //Debug.Log(isParachuting);
         }
     }
 
