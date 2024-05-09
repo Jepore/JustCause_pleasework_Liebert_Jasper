@@ -61,6 +61,24 @@ public class AnimationController : MonoBehaviour
             anim.SetBool("parachuting", false);
         }
 
+        if (this.GetComponent<Glider>().isGliding)
+        {
+            anim.SetBool("gliding", true);
+        }
+        else
+        {
+            anim.SetBool("gliding", false);
+        }
+
+        if (PlayerController.Instance.acting == ActionState.lerping)
+        {
+            anim.SetBool("climbing", true);
+        }
+        else
+        {
+            anim.SetBool("climbing", false);
+        }
+
         anim.SetFloat("strafe", PlayerController.Instance.move.ReadValue<Vector2>().x);
 
     }

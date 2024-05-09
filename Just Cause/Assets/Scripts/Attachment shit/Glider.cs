@@ -31,6 +31,10 @@ public class Glider : Attachment
         if (collected && !isGliding)
         {
             isGliding = true;
+            this.attachmentGameObject.SetActive(false);
+            this.GetComponent<Grappler>().attachmentGameObject.SetActive(false);
+            this.GetComponent<Parachute>().attachmentGameObject.SetActive(false);
+            this.GetComponent<Weapon>().attachmentGameObject.SetActive(false);
             glideRotation = this.transform.eulerAngles;
             //PlayerController.Instance.playerRB.drag
             PlayerController.Instance.act = PlayerController.Instance.Gliding;
@@ -43,16 +47,16 @@ public class Glider : Attachment
         {
             // Rotate
             glideRotation.x += 20 * PlayerController.Instance.move.ReadValue<Vector2>().y * Time.fixedDeltaTime;
-            glideRotation.x = Mathf.Clamp(glideRotation.x, 0, 45);
+            glideRotation.x = Mathf.Clamp(glideRotation.x, -5, 45);
             glideRotation.y += 50 * PlayerController.Instance.move.ReadValue<Vector2>().x * Time.fixedDeltaTime;
-            glideRotation.z = -7 * PlayerController.Instance.move.ReadValue<Vector2>().x;
-            glideRotation.x = Mathf.Clamp(glideRotation.x, -15, 15);
+            glideRotation.z = -30 * PlayerController.Instance.move.ReadValue<Vector2>().x * Time.fixedDeltaTime;
+            glideRotation.z = Mathf.Clamp(glideRotation.z, -30, 30);
             transform.rotation = Quaternion.Euler(glideRotation);
 
-            anglePercentage = glideRotation.x / 45;
+            anglePercentage = (glideRotation.x + 5) / 50;
             float dragMod = (anglePercentage * -2) + 6;
             Debug.Log("angle" + anglePercentage);
-            float speedMod = (anglePercentage * 1.3f) + 12.5f;
+            float speedMod = (anglePercentage * 20) + 12.5f;
             Debug.Log("speed" + speedMod);
 
             PlayerController.Instance.playerRB.drag = dragMod;
@@ -72,7 +76,12 @@ public class Glider : Attachment
     {
         if (isGliding)
         {
-            glideRotation.z = 0;
+            this.attachmentGameObject.SetActive(true);
+            this.GetComponent<Grappler>().attachmentGameObject.SetActive(true);
+            this.GetComponent<Parachute>().attachmentGameObject.SetActive(true);
+            this.GetComponent<Weapon>().attachmentGameObject.SetActive(true);
+
+            glideRotation = new Vector3(0, glideRotation.y, 0);
             transform.rotation = Quaternion.Euler(glideRotation);
             Debug.Log("stopped gliding");
             isGliding = false;

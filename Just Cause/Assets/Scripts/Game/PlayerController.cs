@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 
 public enum AttachmentType {rocket, parachute, glider, grappler}
-public enum ActionState {walking, sprinting, falling, grappling, parachuting, gliding, hanging}
+public enum ActionState {walking, sprinting, falling, grappling, parachuting, gliding, hanging, lerping}
 
 public class PlayerController : MonoBehaviour
 {
@@ -226,11 +226,6 @@ public class PlayerController : MonoBehaviour
         acting = ActionState.gliding;
 
         playerRB.useGravity = true;
-
-        if (IsGrounded())
-        {
-            this.GetComponent<Glider>().StopGliding();
-        }
     }
 
     public void Hanging()
@@ -239,14 +234,24 @@ public class PlayerController : MonoBehaviour
 
         playerRB.useGravity = false;
 
-        playerRB.position = Vector3.Lerp(playerRB.position, stickPoint, 20 * Time.fixedDeltaTime);
-        test.transform.position = stickPoint;
+        if ((stickPoint - playerRB.position).magnitude <= 5)
+        {
+            playerRB.position = Vector3.Lerp(playerRB.position, stickPoint, 20 * Time.fixedDeltaTime);
+            test.transform.position = stickPoint;
+        }
+
     }
 
     private void Lerping()
     {
+        acting = ActionState.lerping;
+
         playerRB.useGravity = false;
-        playerRB.position = Vector3.Lerp(playerRB.position, ledgeFound, Time.fixedDeltaTime);
+        playerRB.position = Vector3.Lerp(playerRB.position, ledgeFound, 5 * Time.fixedDeltaTime);
+        if (playerRB.position == ledgeFound)
+        {
+            act = Walking;
+        }
     }
 
     private void Look()
@@ -258,7 +263,7 @@ public class PlayerController : MonoBehaviour
         verticalRot -= lookVector.y * sensitivity;
         verticalRot = Mathf.Clamp(verticalRot, -upDownRange, upDownRange);
 
-        if(this.gameObject.GetComponent<Grappler>().isGrappling || this.gameObject.GetComponent<Grappler>().isWallSticking || this.gameObject.GetComponent<Grappler>().isWallHanging)
+        if(this.gameObject.GetComponent<Grappler>().isGrappling || this.gameObject.GetComponent<Grappler>().isWallSticking || this.gameObject.GetComponent<Grappler>().isWallHanging || this.gameObject.GetComponent<Glider>().isGliding)
         {
             lookRot += mouseX;
             orientation.localRotation = Quaternion.Euler(verticalRot, lookRot, 0);
@@ -283,22 +288,39 @@ public class PlayerController : MonoBehaviour
             this.GetComponent<Grappler>().StopGrapple();
             Debug.Log("grapplingjump");
             act = Falling;
-            forceDirection = Vector3.up * jumpForce;
+            playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
         else if (this.GetComponent<Grappler>().isWallHanging || this.GetComponent<Grappler>().isWallSticking)
         {
-            this.GetComponent<Grappler>().isWallHanging = false;
-            this.GetComponent<Grappler>().isWallSticking = false;
+            if (this.GetComponent<Grappler>().isWallHanging)
+            {
+                this.GetComponent<Grappler>().isWallHanging = false;
+                this.GetComponent<Grappler>().isWallSticking = false;
+                act = Lerping;
+            }
+            else
+            {
+                this.GetComponent<Grappler>().isWallHanging = false;
+                this.GetComponent<Grappler>().isWallSticking = false;
+                act = Falling;
+                playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
+
+            
             //if
             Debug.Log("wall hang to jump");
-            act = Falling;
-            forceDirection = Vector3.up * jumpForce;
+
         }
         else if (this.GetComponent<Parachute>().isParachuting)
         {
             this.GetComponent<Parachute>().StopParachuting();
             //forceDirection += Vector3.up * jumpForce;
             act = Walking;
+        }
+        else if (this.GetComponent<Glider>().isGliding)
+        {
+            act = Falling;
+            playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
         else
         {

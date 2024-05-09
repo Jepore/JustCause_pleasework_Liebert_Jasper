@@ -72,11 +72,15 @@ public class Grappler : Attachment
         // make sure we have a grappling point
         if (collected && grappled)
         {
+            if (this.GetComponent<Glider>().isGliding)
+            {
+                this.GetComponent<Glider>().StopGliding();
+            }
             isGrappling = true;
             this.GetComponent<Parachute>().isParachuting = false; // i could also make the grappling hook pull the parachute in the direction of the grapplePoint for a period of time
             gunTipStartPos = gunTip.position;
             grappleTimeStart = Time.time;
-            grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/13f;
+            grappleTimeDuration = (grapplePoint - gunTipStartPos).magnitude/18f;
 
             PlayerController.Instance.playerRB.useGravity = false;
             PlayerController.Instance.lookRot = PlayerController.Instance.transform.forward.y;
@@ -103,23 +107,24 @@ public class Grappler : Attachment
         // End Position: grapplePoint
         if (isGrappling)
         {
-            grappleU = ((grappleTimeStart + grappleTimeDuration) - Time.time)/grappleTimeDuration;
-            
-            if (grappleU < 0)
+            grappleU = (Time.time - grappleTimeStart)/grappleTimeDuration;
+            // ease grappleU
+            grappleU = Mathf.Pow(grappleU, 1.5f);
+            if (grappleU > 1)
             {
-                grappleU = 0;
+                grappleU = 1;
                 PlayerController.Instance.act = PlayerController.Instance.Walking;
                 StopGrapple();
                 //PlayerController.Instance.StickToWall();
             }
             else if (PlayerController.Instance.WallStickCheck())
             {
-                grappleU = 0;
+                grappleU = 1;
                 PlayerController.Instance.StickToWall();
                 StopGrapple();
             }
 
-            grapplePos = (1 - grappleU) * grapplePoint + grappleU * gunTipStartPos;
+            grapplePos = (1 - grappleU) * gunTipStartPos + grappleU * grapplePoint;
             //grapplePos = 
             Vector3 grappleGunTipOffset = gunTip.position - this.transform.position;
 
@@ -167,15 +172,6 @@ public class Grappler : Attachment
     {
         Grappling();
         RenderGrappleLine();
-
-        if (PlayerController.Instance.playerInputActions.Player.Jump.triggered && isGrappling)
-        {
-            grappleU = 0;
-            StopGrapple();
-            PlayerController.Instance.act = PlayerController.Instance.Falling;
-            //PlayerController.Instance.playerRB.AddForce(Vector3.up * PlayerController.Instance.jumpForce, ForceMode.Impulse);
-            //PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce;
-        }
     }
 
     private IEnumerator GrappleHookHit()

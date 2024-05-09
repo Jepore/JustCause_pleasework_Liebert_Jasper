@@ -26,7 +26,7 @@ public class Parachute : Attachment
 
     public void ActivateParachute()
     {
-        if (collected && !isParachuting && !this.GetComponent<Grappler>().isGrappling)
+        if (collected && !isParachuting && !this.GetComponent<Grappler>().isGrappling && !this.GetComponent<Glider>().isGliding)
         {
             isParachuting = true;
             PlayerController.Instance.forceDirection += Vector3.up * PlayerController.Instance.jumpForce * 1.5f;
