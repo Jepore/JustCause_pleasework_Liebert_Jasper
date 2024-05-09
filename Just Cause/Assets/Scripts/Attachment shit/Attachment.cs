@@ -4,15 +4,8 @@ using UnityEngine;
 
 public class Attachment : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public bool collected = false; // TODO switch to false 
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public GameObject attachmentGameObject;
+
 }
