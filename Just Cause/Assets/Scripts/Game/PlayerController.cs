@@ -26,6 +26,7 @@ public class PlayerController : MonoBehaviour
     private float maxSpeed = 5f;
     private float sprintMult = 1.35f;
     public Vector3 forceDirection = Vector3.zero;
+    public bool parachuteJump = true;
     private Vector3 stickPoint;
     public LedgeCheck ledgeCheck;
     public Vector3 ledgeFound;
@@ -279,14 +280,14 @@ public class PlayerController : MonoBehaviour
     {
         if (IsGrounded())
         {
-            Debug.Log("jumped");
+            //Debug.Log("jumped");
             act = Falling;
             forceDirection += Vector3.up * jumpForce;
         }
         else if (this.GetComponent<Grappler>().isGrappling)
         {
             this.GetComponent<Grappler>().StopGrapple();
-            Debug.Log("grapplingjump");
+            //Debug.Log("grapplingjump");
             act = Falling;
             playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
@@ -305,10 +306,7 @@ public class PlayerController : MonoBehaviour
                 act = Falling;
                 playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
-
-            
-            //if
-            Debug.Log("wall hang to jump");
+            //Debug.Log("wall hang to jump");
 
         }
         else if (this.GetComponent<Parachute>().isParachuting)
@@ -319,12 +317,11 @@ public class PlayerController : MonoBehaviour
         }
         else if (this.GetComponent<Glider>().isGliding)
         {
-            act = Falling;
+            this.GetComponent<Glider>().StopGliding();
             playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
         else
         {
-            Debug.Log("Last resort");
             this.GetComponent<Parachute>().ActivateParachute();
         }
         //Debug.Log(forceDirection);
@@ -332,7 +329,7 @@ public class PlayerController : MonoBehaviour
 
     public bool WallStickCheck()
     {
-        Ray raycast = new Ray(this.transform.position + Vector3.up * 0.5f, this.transform.forward);
+        Ray raycast = new Ray(this.transform.position + Vector3.up, this.transform.forward);
         if (Physics.Raycast(raycast, out RaycastHit hit, 1f))
         {
             if (CheckForLedge())
@@ -381,12 +378,14 @@ public class PlayerController : MonoBehaviour
     public void StickToWall()
     {
         Vector3 stickPos;
+        Vector3 forwardXZ = this.transform.forward;
+        forwardXZ.y = 0;
 
-        Ray raycast = new Ray(this.transform.position, this.transform.forward);
+        Ray raycast = new Ray(this.transform.position, forwardXZ);
         if (Physics.Raycast(raycast, out RaycastHit hit, 1f))
         {
             transform.forward = -hit.normal;
-            stickPos = hit.point - this.transform.forward * 0.3f;
+            stickPos = hit.point - forwardXZ * 0.3f;
             //this.transform.position = stickPos;
             if (this.GetComponent<Grappler>().isWallHanging)
             {
@@ -463,8 +462,9 @@ public class PlayerController : MonoBehaviour
             // if raycast hits anything
             if (Physics.Raycast(raycast, out RaycastHit hit, .05f))
             {
-                test.transform.position = hit.point;
+                //test.transform.position = hit.point;
                 //Debug.Log("IS GROUNDED");
+                parachuteJump = true;
                 return true;
             }
             else

@@ -46,17 +46,17 @@ public class Glider : Attachment
         if (isGliding)
         {
             // Rotate
-            glideRotation.x += 20 * PlayerController.Instance.move.ReadValue<Vector2>().y * Time.fixedDeltaTime;
-            glideRotation.x = Mathf.Clamp(glideRotation.x, -5, 45);
-            glideRotation.y += 50 * PlayerController.Instance.move.ReadValue<Vector2>().x * Time.fixedDeltaTime;
-            glideRotation.z = -30 * PlayerController.Instance.move.ReadValue<Vector2>().x * Time.fixedDeltaTime;
+            glideRotation.x += 40 * PlayerController.Instance.move.ReadValue<Vector2>().y * Time.fixedDeltaTime;
+            glideRotation.x = Mathf.Clamp(glideRotation.x, -12, 45);
+            glideRotation.y += 80 * PlayerController.Instance.move.ReadValue<Vector2>().x * Time.fixedDeltaTime;
+            glideRotation.z += -90 * PlayerController.Instance.move.ReadValue<Vector2>().x * Time.fixedDeltaTime;
             glideRotation.z = Mathf.Clamp(glideRotation.z, -30, 30);
             transform.rotation = Quaternion.Euler(glideRotation);
 
-            anglePercentage = (glideRotation.x + 5) / 50;
+            anglePercentage = (glideRotation.x + 12) / 57;
             float dragMod = (anglePercentage * -2) + 6;
             Debug.Log("angle" + anglePercentage);
-            float speedMod = (anglePercentage * 20) + 12.5f;
+            float speedMod = (anglePercentage * 6) + 16f;
             Debug.Log("speed" + speedMod);
 
             PlayerController.Instance.playerRB.drag = dragMod;
@@ -88,5 +88,15 @@ public class Glider : Attachment
             PlayerController.Instance.playerRB.drag = 3.5f;
             PlayerController.Instance.act = PlayerController.Instance.Falling;
         }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag != "floor" && isGliding)
+        {
+            StopGliding();
+            Debug.Log("collider hit something and cancelled glider");
+        }
+
     }
 }

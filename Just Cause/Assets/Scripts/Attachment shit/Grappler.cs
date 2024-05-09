@@ -109,7 +109,7 @@ public class Grappler : Attachment
         {
             grappleU = (Time.time - grappleTimeStart)/grappleTimeDuration;
             // ease grappleU
-            grappleU = Mathf.Pow(grappleU, 1.5f);
+            grappleU = Mathf.Pow(grappleU, 1.3f);
             if (grappleU > 1)
             {
                 grappleU = 1;
@@ -124,7 +124,8 @@ public class Grappler : Attachment
                 StopGrapple();
             }
 
-            grapplePos = (1 - grappleU) * gunTipStartPos + grappleU * grapplePoint;
+            grapplePos = Vector3.Lerp(gunTipStartPos, grapplePoint, grappleU);
+            //grapplePos = (1 - grappleU) * gunTipStartPos + grappleU * grapplePoint;
             //grapplePos = 
             Vector3 grappleGunTipOffset = gunTip.position - this.transform.position;
 
@@ -168,7 +169,7 @@ public class Grappler : Attachment
     }
 
     // Update is called once per frame
-   private void Update()
+   private void FixedUpdate()
     {
         Grappling();
         RenderGrappleLine();
